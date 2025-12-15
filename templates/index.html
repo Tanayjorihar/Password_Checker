@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Checker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: #667eea;
+        }
+        
+        .password-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        #password {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        #password:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #718096;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .strength-meter {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.5s ease, background 0.5s ease;
+        }
+        
+        .strength-very-weak { background: #e53e3e; width: 20%; }
+        .strength-weak { background: #ed8936; width: 40%; }
+        .strength-moderate { background: #ecc94b; width: 60%; }
+        .strength-strong { background: #48bb78; width: 80%; }
+        .strength-very-strong { background: #38a169; width: 100%; }
+        
+        .strength-text {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .suggestions-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .suggestions-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .suggestions-list li:before {
+            content: "💡";
+        }
+        
+        .suggestions-list li.good:before {
+            content: "✅";
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        
+        .breach-result {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .breach-safe {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .breach-found {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .breach-error {
+            background: #feebc8;
+            color: #744210;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .detail-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .detail-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .detail-label {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .generated-password {
+            background: #e6fffa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            word-break: break-all;
+            border: 2px dashed #38b2ac;
+        }
+        
+        .copy-btn {
+            margin-top: 10px;
+            background: #38b2ac;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .copy-btn:hover {
+            background: #319795;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-shield-alt"></i> Password Strength Checker</h1>
+            <p class="subtitle">Check your password security and get actionable suggestions</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2><i class="fas fa-key"></i> Password Analysis</h2>
+                
+                <div class="password-input-container">
+                    <input type="password" id="password" placeholder="Enter your password to check..." autocomplete="off">
+                    <button class="toggle-password" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn-primary" onclick="analyzePassword()">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                    <button class="btn-secondary" onclick="checkBreaches()">
+                        <i class="fas fa-shield-alt"></i> Check Breaches
+                    </button>
+                    <button class="btn-success" onclick="generatePassword()">
+                        <i class="fas fa-random"></i> Generate
+                    </button>
+                </div>
+                
+                <div id="breachResult" style="display: none;"></div>
+                <div id="generatedPassword" style="display: none;"></div>
+                
+                <div id="analysisResult" style="display: none;">
+                    <div class="strength-meter">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    
+                    <div class="strength-text">
+                        Strength: <span id="strengthText">Very Weak</span>
+                        <div class="score-badge" id="scoreBadge">0/100</div>
+                    </div>
+                    
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <div class="detail-value" id="lengthValue">0</div>
+                            <div class="detail-label">Length</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value" id="entropyValue">0</div>
+                            <div class="detail-label">Entropy (bits)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value" id="timeToCrack">Instant</div>
+                            <div class="detail-label">Time to Crack</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value" id="characterTypes">0/4</div>
+                            <div class="detail-label">Character Types</div>
+                        </div>
+                    </div>
+                    
+                    <h3><i class="fas fa-lightbulb"></i> Suggestions</h3>
+                    <ul class="suggestions-list" id="suggestionsList">
+                        <!-- Suggestions will be added here -->
+                    </ul>
+                </div>
+                
+                <div id="loading" class="loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Analyzing...
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalChecks">0</div>
+                        <div class="stat-label">Total Checks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="breachedCount">0</div>
+                        <div class="stat-label">Breached Passwords</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="averageScore">0</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="averageLength">0</div>
+                        <div class="stat-label">Avg Length</div>
+                    </div>
+                </div>
+                
+                <h3><i class="fas fa-history"></i> Session History</h3>
+                <div class="buttons">
+                    <button class="btn-secondary" onclick="loadHistory()">
+                        <i class="fas fa-history"></i> Load History
+                    </button>
+                    <button class="btn-danger" onclick="clearHistory()">
+                        <i class="fas fa-trash"></i> Clear History
+                    </button>
+                </div>
+                
+                <div id="historyList" style="margin-top: 15px;">
+                    <!-- History will be added here -->
+                </div>
+                
+                <div class="buttons" style="margin-top: 20px;">
+                    <button class="btn-secondary" onclick="exportData()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                    <button class="btn-secondary" onclick="checkHealth()">
+                        <i class="fas fa-heartbeat"></i> Health Check
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>🔒 Passwords are never stored in plain text. All analysis uses hashed values only.</p>
+            <p>⚠️ This tool is for educational purposes. Always use unique, strong passwords.</p>
+            <p>📊 Statistics are anonymized and stored locally in JSON files.</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const analysisResult = document.getElementById('analysisResult');
+        const loadingElement = document.getElementById('loading');
+        const breachResult = document.getElementById('breachResult');
+        const generatedPassword = document.getElementById('generatedPassword');
+        
+        // Statistics elements
+        const totalChecksEl = document.getElementById('totalChecks');
+        const breachedCountEl = document.getElementById('breachedCount');
+        const averageScoreEl = document.getElementById('averageScore');
+        const averageLengthEl = document.getElementById('averageLength');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            updateStatsDisplay(); // Update display initially
+        });
+        
+        // Toggle password visibility
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+        
+        // Analyze password
+        async function analyzePassword() {
+            const password = passwordInput.value.trim();
+            
+            if (!password) {
+                alert('Please enter a password to analyze');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                displayAnalysis(data);
+                
+                // Reload stats after analysis
+                loadStats();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing password: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Check breaches
+        async function checkBreaches() {
+            const password = passwordInput.value.trim();
+            
+            if (!password) {
+                alert('Please enter a password to check');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/check-breaches', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                displayBreachResult(data);
+                
+                // Reload stats after breach check
+                loadStats();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                displayBreachResult({
+                    breached: null,
+                    message: 'Error checking breaches: ' + error.message
+                });
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Generate password
+        async function generatePassword() {
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/generate?length=16');
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                displayGeneratedPassword(data);
+                
+                // Auto-fill the password field
+                passwordInput.value = data.password;
+                
+                // Reload stats
+                loadStats();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating password: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Load statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load statistics');
+                }
+                
+                const data = await response.json();
+                updateStatsDisplay(data);
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Use default values if stats fail to load
+                updateStatsDisplay({
+                    total_checks: 0,
+                    breached_count: 0,
+                    average_score: 0,
+                    average_length: 0
+                });
+            }
+        }
+        
+        // Update statistics display
+        function updateStatsDisplay(stats = {}) {
+            totalChecksEl.textContent = stats.total_checks || 0;
+            breachedCountEl.textContent = stats.breached_count || 0;
+            averageScoreEl.textContent = (stats.average_score || 0).toFixed(1);
+            averageLengthEl.textContent = (stats.average_length || 0).toFixed(1);
+        }
+        
+        // Load history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load history');
+                }
+                
+                const data = await response.json();
+                displayHistory(data);
+                
+            } catch (error) {
+                console.error('Error loading history:', error);
+                document.getElementById('historyList').innerHTML = 
+                    '<div class="error">Error loading history: ' + error.message + '</div>';
+            }
+        }
+        
+        // Clear history
+        async function clearHistory() {
+            if (!confirm('Are you sure you want to clear your password check history?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/clear-history', {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to clear history');
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('historyList').innerHTML = 
+                        '<div class="breach-safe">History cleared successfully!</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error clearing history:', error);
+                alert('Error clearing history: ' + error.message);
+            }
+        }
+        
+        // Export data
+        async function exportData() {
+            try {
+                const response = await fetch('/api/export-data');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to export data');
+                }
+                
+                const data = await response.json();
+                
+                // Create a downloadable JSON file
+                const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'password-checker-export-' + new Date().toISOString().split('T')[0] + '.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Error exporting data: ' + error.message);
+            }
+        }
+        
+        // Health check
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                alert('System Status: ' + data.status.toUpperCase() + 
+                      '\nJSON Files: ' + (data.json_files.data_file ? 'OK' : 'Missing') +
+                      '\nHIBP API: ' + (data.api_connectivity?.hibp_api ? 'OK' : 'Not reachable'));
+                
+            } catch (error) {
+                console.error('Health check error:', error);
+                alert('Health check failed: ' + error.message);
+            }
+        }
+        
+        // Display analysis results
+        function displayAnalysis(data) {
+            analysisResult.style.display = 'block';
+            
+            // Update strength bar and text
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            const scoreBadge = document.getElementById('scoreBadge');
+            
+            strengthBar.className = 'strength-bar strength-' + data.strength.toLowerCase().replace(' ', '-');
+            strengthText.textContent = data.strength;
+            strengthText.style.color = getStrengthColor(data.strength);
+            scoreBadge.textContent = data.score + '/100';
+            scoreBadge.style.background = getStrengthColor(data.strength);
+            
+            // Update details
+            document.getElementById('lengthValue').textContent = data.length;
+            document.getElementById('entropyValue').textContent = data.entropy;
+            document.getElementById('timeToCrack').textContent = data.time_to_crack;
+            
+            // Calculate character types
+            const types = [data.has_lower, data.has_upper, data.has_digit, data.has_special];
+            const typeCount = types.filter(Boolean).length;
+            document.getElementById('characterTypes').textContent = typeCount + '/4';
+            
+            // Update suggestions
+            const suggestionsList = document.getElementById('suggestionsList');
+            suggestionsList.innerHTML = '';
+            
+            data.suggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.textContent = suggestion;
+                
+                // Mark good suggestions
+                if (suggestion.includes('Excellent') || suggestion.includes('Good')) {
+                    li.className = 'good';
+                }
+                
+                suggestionsList.appendChild(li);
+            });
+        }
+        
+        // Display breach result
+        function displayBreachResult(data) {
+            breachResult.style.display = 'block';
+            
+            let className = 'breach-error';
+            let icon = '❓';
+            
+            if (data.breached === true) {
+                className = 'breach-found';
+                icon = '⚠️';
+            } else if (data.breached === false) {
+                className = 'breach-safe';
+                icon = '✅';
+            }
+            
+            breachResult.className = 'breach-result ' + className;
+            breachResult.innerHTML = `
+                <div>${icon} ${data.message}</div>
+                ${data.breach_count > 0 ? `<div style="margin-top: 10px; font-size: 1.2em;">Breach Count: ${data.breach_count.toLocaleString()}</div>` : ''}
+            `;
+        }
+        
+        // Display generated password
+        function displayGeneratedPassword(data) {
+            generatedPassword.style.display = 'block';
+            generatedPassword.className = 'generated-password';
+            generatedPassword.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px;">Generated Password:</div>
+                <div style="font-family: monospace; font-size: 1.2em; letter-spacing: 2px; margin-bottom: 15px;">${data.password}</div>
+                <div style="color: #718096; margin-bottom: 15px;">
+                    Length: ${data.length} | Strength: ${data.analysis?.strength || 'Unknown'} | Score: ${data.analysis?.score || 0}/100
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('${data.password}')">
+                    <i class="fas fa-copy"></i> Copy to Clipboard
+                </button>
+            `;
+        }
+        
+        // Display history
+        function displayHistory(data) {
+            const historyList = document.getElementById('historyList');
+            
+            if (!data.checks || data.checks.length === 0) {
+                historyList.innerHTML = '<div class="breach-safe">No password check history found.</div>';
+                return;
+            }
+            
+            let html = '<h4>Recent Password Checks:</h4>';
+            
+            data.checks.slice(-10).reverse().forEach(check => {
+                const date = new Date(check.timestamp).toLocaleString();
+                html += `
+                    <div class="detail-item" style="text-align: left; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: bold; color: ${getStrengthColor(check.strength)}">${check.strength}</span>
+                            <span style="color: #718096; font-size: 0.9em;">${date}</span>
+                        </div>
+                        <div style="margin-top: 5px;">
+                            <span class="score-badge" style="font-size: 0.9em; background: ${getStrengthColor(check.strength)}">${check.score}/100</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyList.innerHTML = html;
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Password copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy password to clipboard');
+            });
+        }
+        
+        // Show loading indicator
+        function showLoading() {
+            loadingElement.style.display = 'block';
+            analysisResult.style.display = 'none';
+            breachResult.style.display = 'none';
+        }
+        
+        // Hide loading indicator
+        function hideLoading() {
+            loadingElement.style.display = 'none';
+        }
+        
+        // Get color based on strength
+        function getStrengthColor(strength) {
+            switch(strength.toLowerCase()) {
+                case 'very strong': return '#38a169';
+                case 'strong': return '#48bb78';
+                case 'moderate': return '#ecc94b';
+                case 'weak': return '#ed8936';
+                case 'very weak': return '#e53e3e';
+                default: return '#718096';
+            }
+        }
+        
+        // Auto-analyze on Enter key
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzePassword();
+            }
+        });
+    </script>
+</body>
+</html>

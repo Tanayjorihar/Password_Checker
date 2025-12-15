@@ -1,0 +1,3 @@
+New-Item -ItemType File -Name "Procfile" -Value @"
+web: gunicorn app:app
+"@
