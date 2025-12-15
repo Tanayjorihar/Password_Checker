@@ -1,4 +1,3 @@
-New-Item -ItemType File -Name "README.md" -Value @"
 # 🔐 Password Strength Checker Web Application
 
 A secure, educational tool for analyzing password strength with safe storage.
@@ -27,7 +26,7 @@ A secure, educational tool for analyzing password strength with safe storage.
 
 1. **Clone the repository**:
    \`\`\`bash
-   git clone https://github.com/yourusername/password-checker.git
+   https://github.com/Tanayjorihar/Password_Checker.git
    cd password-checker
    \`\`\`
 
@@ -56,23 +55,6 @@ A secure, educational tool for analyzing password strength with safe storage.
    \`\`\`
    http://localhost:5000
    \`\`\`
-
-## 🌐 Deployment
-
-### Option 1: Render.com (Recommended - Free)
-
-1. **Create a Render account** at https://render.com
-2. **Connect your GitHub repository**
-3. **Create a new Web Service**
-4. **Configure**:
-   - **Name**: password-checker
-   - **Environment**: Python
-   - **Build Command**: \`pip install -r requirements.txt\`
-   - **Start Command**: \`gunicorn app:app\`
-   - **Plan**: Free
-
-5. **Click "Create Web Service"**
-6. **Your app will be live at**: \`https://password-checker.onrender.com\`
 
 ## ⚠️ Important Warnings
 
