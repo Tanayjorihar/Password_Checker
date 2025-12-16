@@ -2,6 +2,9 @@
 
 A secure, educational tool for analyzing password strength with safe storage.
 
+## 🌐 Live Demo
+**Access the application here:** [https://tanayjorihar.pythonanywhere.com/](https://tanayjorihar.pythonanywhere.com/)
+
 ## 🚀 Features
 
 - **Real-time Password Analysis**: Instant strength scoring
@@ -25,13 +28,13 @@ A secure, educational tool for analyzing password strength with safe storage.
 ### Local Development
 
 1. **Clone the repository**:
-   \`\`\`bash
-   https://github.com/Tanayjorihar/Password_Checker.git
+   ```bash
+   git clone https://github.com/Tanayjorihar/Password_Checker.git
    cd password-checker
-   \`\`\`
+   ```
 
 2. **Create virtual environment**:
-   \`\`\`bash
+   ```bash
    python -m venv venv
    
    # On Windows:
@@ -39,22 +42,22 @@ A secure, educational tool for analyzing password strength with safe storage.
    
    # On Mac/Linux:
    source venv/bin/activate
-   \`\`\`
+   ```
 
 3. **Install dependencies**:
-   \`\`\`bash
+   ```bash
    pip install -r requirements.txt
-   \`\`\`
+   ```
 
 4. **Run the application**:
-   \`\`\`bash
+   ```bash
    python app.py
-   \`\`\`
+   ```
 
 5. **Open in browser**:
-   \`\`\`
+   ```
    http://localhost:5000
-   \`\`\`
+   ```
 
 ## ⚠️ Important Warnings
 
@@ -69,14 +72,13 @@ This tool is for **EDUCATIONAL PURPOSES ONLY**:
 
 ## 🔧 API Endpoints
 
-- \`GET /\` - Main interface
-- \`POST /api/analyze\` - Analyze password strength
-- \`POST /api/check-breaches\` - Check password breaches
-- \`GET /api/generate\` - Generate strong password
-- \`GET /api/stats\` - Get statistics
-- \`POST /api/clear-history\` - Clear session history
+- `GET /` - Main interface
+- `POST /api/analyze` - Analyze password strength
+- `POST /api/check-breaches` - Check password breaches
+- `GET /api/generate` - Generate strong password
+- `GET /api/stats` - Get statistics
+- `POST /api/clear-history` - Clear session history
 
 ## 📝 License
 
 Educational Use Only - Not for production use
-"@
